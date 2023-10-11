@@ -1,0 +1,35 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+import { app } from "../../../firebase/server";
+import { getFirestore } from "firebase-admin/firestore";
+
+const user = Astro.locals.user;
+
+if (!user) {
+  return Astro.redirect("/signin");
+}
+
+const {name} = Astro.params;
+
+const db = getFirestore(app);
+const robotsRef = db.collection("robots")
+const dataSnapshot = await robotsRef.where("name", "==", name).get()
+const data = dataSnapshot.docs.map((doc) => ({
+  id: doc.id,
+  ...doc.data(),
+}))
+
+const robot = data[0]
+---
+
+<Layout title="dashboard">
+    <section class="w-4/5 mx-auto my-20">
+        <div>
+            <h1 class="text-5xl font-bold">{robot.fullName}</h1>
+            <p class="bg-secondary p-2 rounded text-white w-fit my-2">{robot.name}</p>
+            <p class="my-5">{robot.introduction}</p>
+            <p class="my-5">{robot.description}</p>
+        </div>
+
+    </section>
+</Layout>../../../firebasestuff/server

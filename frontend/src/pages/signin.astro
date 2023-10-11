@@ -1,0 +1,71 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const user = Astro.locals.user;
+
+if (user) {
+  return Astro.redirect("/dashboard");
+}
+---
+
+<Layout title="Sign in">
+  <div class="flex justify-center items-center h-[80vh] w-full">
+    <div class="px-20 py-20 flex flex-col justify-start items-center border-[1px] border-dotted bg-white shadow-md rounded-lg">
+      <h1 class="text-5xl font-bold mb-10">Sign in to ReRo</h1>
+      <form action="/api/auth/signin" method="post" class="flex flex-col justify-start items-start w-full gap-10">
+        <div class="w-full flex flex-col justify-start items-start gap-2">
+          <label class="font-medium text-text-light text-lg" for="email" for="email">Email</label>
+          <input class="border-[2px] border-text-light p-3 w-full rounded-lg" type="email" name="email" id="email" placeholder="youremail@domain.com" />
+        </div>
+
+        <div class="w-full flex flex-col justify-start items-start gap-2">
+          <label class="font-medium text-text-light text-lg" for="password">Password</label>
+          <input class="border-[2px] border-text-light p-3 w-full rounded-lg" type="password" name="password" id="password" placeholder="Enter your password" />
+        </div>
+
+        <button class="bg-text-heading px-4 py-3 rounded text-white font-semibold shadow-lg shadow-primary" type="submit">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+</Layout>
+<script>
+  import {
+    getAuth,
+    inMemoryPersistence,
+    signInWithEmailAndPassword,
+  } from "firebase/auth";
+  import { app } from "../firebasestuff/client";
+
+  const auth = getAuth(app);
+  // This will prevent the browser from storing session data
+  auth.setPersistence(inMemoryPersistence);
+
+  const form = document.querySelector("form") as HTMLFormElement;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(form);
+    const email = formData.get("email")?.toString();
+    const password = formData.get("password")?.toString();
+
+    if (!email || !password) {
+      return;
+    }
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+    const idToken = await userCredential.user.getIdToken();
+    const response = await fetch("/api/auth/signin", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+
+    if (response.redirected) {
+      window.location.assign(response.url);
+    }
+  });
+</script>

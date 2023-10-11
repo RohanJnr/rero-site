@@ -1,0 +1,30 @@
+---
+import '../styles/base.css';
+import Navbar from "../components/Navbar.astro";
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Astro description" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body class="min-h-[100vh]">
+		<Navbar />
+		<slot />
+
+		<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.0/flowbite.min.js"></script>
+		<script src="https://kit.fontawesome.com/c43096f0f3.js" crossorigin="anonymous"></script>
+
+	</body>
+</html>

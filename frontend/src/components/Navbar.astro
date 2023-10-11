@@ -1,0 +1,30 @@
+---
+const user = Astro.locals.user
+---
+
+
+
+<header class="py-3 border-b-[1px]">
+    <nav class="w-4/5 mx-auto flex justify-between items-center">
+        <div class="flex justify-center items-center gap-10">
+            <a href="/" class="mr-5 text-3xl text-text-heading"><span class="font-bold">ReRo</span> <span class="text-xs text-text-heading text-regular ml-[2px]">Lab</span></a>
+            <a href="/" class="font-semibold text-text-heading text-sm">About Us</a>
+            <a href="/" class="font-semibold text-text-heading text-sm">Faculty & Team</a>
+            <a href="/" class="font-semibold text-text-heading text-sm">Current Progress</a>
+
+        </div>
+        <div class="flex justify-center items-center gap-5">
+            {user ? (
+                <a href="/dashboard" class="text-text-heading px-6 py-3 rounded border-[1px] border-[#dadada] font-semibold text-sm">Dashboard</a>
+                <form action="/api/auth/signout">
+                    <button type="submit">Sign out</button>
+                </form>
+
+            ):(
+                <a href="/signin" class="text-white px-6 py-3 rounded bg-black font-semibold text-sm">SignIn</a>
+                <a href="/register" class="text-text-heading px-6 py-3 rounded border-[1px] border-[#dadada] font-semibold text-sm">Register</a>
+            )}
+
+        </div>
+    </nav>
+</header>
