@@ -6,8 +6,6 @@
 
 // const char *ssid = "PBTRON";
 // const char *pass = "bowdog123";
-const char *ssid = "Avenu... 2.4GHz";
-const char *pass = "ADrgMa1@$$$";
 
 const int SENSOR_PORT = 8002;  
 
