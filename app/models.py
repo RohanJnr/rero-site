@@ -1,7 +1,8 @@
-from typing import Optional
+import typing as t
 from enum import Enum
+from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class StatusEnum(str, Enum):
@@ -16,6 +17,7 @@ class StatusEnum(str, Enum):
 class APISubmission(BaseModel):
     """Submissions receieved at API endpoint."""
     submitted_by: str
+    submitted_by_email: str
     code: str
     robot: str
 
@@ -23,6 +25,12 @@ class APISubmission(BaseModel):
 class Submission(APISubmission):
     """Submissions DB model after processing API Submission."""
     team: str
-    submission_id: Optional[str] = None
-    datetime_iso: str
+    submission_id: t.Optional[str] = None
+    timestamp: datetime
     status: StatusEnum = StatusEnum.ready
+
+
+class APIRunSubmission(BaseModel):
+    """Submission to run received by API."""
+    submission_id: str
+    user_email: str

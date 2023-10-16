@@ -42,11 +42,11 @@ if (!robot.codeAccess.includes(user.email)) {
             <p class="text-text-light">Grab the python code template file <a href="#" class="text-blue-700">here</a>.</p>
         </div>
         <div class="">
-          <SubmissionList client:load />
+          <SubmissionList client:load user={user} />
         </div>
-        <!-- <div class="grid grid-cols-4 gap-10">
-          <FileUpload client:load />
-          <CodeLogs client:load />
-        </div> -->
+        <div class="grid grid-cols-4 gap-10">
+          <FileUpload client:load robot={robot} user={user} />
+          <!-- <CodeLogs client:load /> -->
+        </div>
     </section>
 </Layout>
