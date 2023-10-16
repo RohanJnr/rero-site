@@ -158,3 +158,5 @@ dist/
 .vscode/
 .idea/
 .env
+
+submissions/
