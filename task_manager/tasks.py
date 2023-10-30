@@ -11,6 +11,9 @@ from celery.signals import task_postrun
 from app.models import APITaskFinished
 
 
+BACKEND_ROUTE = "http://localhost:8000"
+
+
 app = Celery('tasks', broker='redis://localhost')
 app.conf.update(
     task_serializer='json',
@@ -23,9 +26,20 @@ app.conf.update(
 
 
 @app.task
-def start_exec(*, module_path: str, log_path: str, **kwargs) -> None:
+def start_exec(*, code: str, module_path: str, log_path: str, **kwargs) -> None:
     """Execute the main function of a submitted python file."""
+
+    module_path = Path(module_path)
     log_path = Path(log_path)
+
+
+    module_path.parent.mkdir(parents=True, exist_ok=True)
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+
+    module_path.touch()
+    log_path.touch()
+
+    module_path.write_text(code)
 
     old = sys.stdout
     with log_path.open(mode="w") as f:
@@ -57,5 +71,5 @@ def task_postrun_handler(sender=None, headers=None, body=None, **kwargs) -> None
     headers = {
         "Content-Type": "application/json"
     }
-    r = requests.post("http://localhost:8000/api/submission/task_finished", json=data.model_dump(), headers=headers)
+    r = requests.post(f"{BACKEND_ROUTE}/api/submission/task_finished", json=data.model_dump(), headers=headers)
     print(r.status_code)

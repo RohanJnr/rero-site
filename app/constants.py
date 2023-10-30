@@ -4,6 +4,7 @@ from redis.asyncio import Redis
 
 
 SUBMISSIONS_PATH = Path("submissions")
+CELERY_SUBMISSIONS_PATH = Path("celery_submissions")
 
 
 class Connections:

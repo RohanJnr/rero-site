@@ -160,3 +160,4 @@ dist/
 .env
 
 submissions/
+celery_submissions/

@@ -14,7 +14,7 @@ from google.cloud.firestore_v1.base_query import FieldFilter
 
 from task_manager.tasks import app, start_exec
 
-from app.constants import SUBMISSIONS_PATH, Connections
+from app.constants import SUBMISSIONS_PATH, Connections, CELERY_SUBMISSIONS_PATH
 from app.models import APISubmission, Submission, APIRunSubmission, APITaskFinished
 from app.utils import sanity_check, write_to_path
 
@@ -96,7 +96,7 @@ async def run(request: Request, run_sub: APIRunSubmission) -> JSONResponse:
     submission.submission_id = doc.id
 
     submission_path = Path(
-        SUBMISSIONS_PATH,
+        CELERY_SUBMISSIONS_PATH,
         submission.robot,
         submission.team,
         submission.submission_id,
@@ -104,7 +104,7 @@ async def run(request: Request, run_sub: APIRunSubmission) -> JSONResponse:
     )
 
     log_path = Path(
-        SUBMISSIONS_PATH,
+        CELERY_SUBMISSIONS_PATH,
         submission.robot,
         submission.team,
         submission.submission_id,
@@ -112,6 +112,7 @@ async def run(request: Request, run_sub: APIRunSubmission) -> JSONResponse:
     )
 
     task = start_exec.delay(
+        code=submission.code,
         module_path=str(submission_path.absolute()),
         log_path=str(log_path.absolute()),
         metadata={"submission_id": submission.submission_id}
