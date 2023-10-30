@@ -34,3 +34,10 @@ class APIRunSubmission(BaseModel):
     """Submission to run received by API."""
     submission_id: str
     user_email: str
+
+
+class APITaskFinished(BaseModel):
+    """Task finished data received by webhook."""
+    submission_id: str
+    task_id: str
+    log_path: str

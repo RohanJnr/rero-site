@@ -1,4 +1,5 @@
 import ast
+from pathlib import Path
 from typing import Tuple
 
 def sanity_check(function_code) -> Tuple[bool, str]:
@@ -22,3 +23,11 @@ def sanity_check(function_code) -> Tuple[bool, str]:
             return False, "Incorrect function signature."
     except SyntaxError as e:
         return False, "Syntax error."
+
+
+def write_to_path(path: Path, text: str) -> None:
+    """Write data to file given its path."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.touch(exist_ok=True)
+
+    path.write_text(text)

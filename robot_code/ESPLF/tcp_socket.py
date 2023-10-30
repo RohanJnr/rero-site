@@ -5,7 +5,7 @@ import time
 
 def main():
     # Define the server address and port
-    server_address = ('192.168.1.78', 8002)
+    server_address = ('127.0.0.1', 12345)
 
     # Create a socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,8 +26,6 @@ def main():
 
             try:
                 # Parse JSON data
-                print("data:", data)
-                print("parsing data")
                 received_data = json.loads(data)
 
                 # Process the received data
@@ -40,7 +38,7 @@ def main():
                 response_data = f"motor {motor_left} {motor_right}\n"
 
                 # Send the response back to the server
-                print("Sending data")
+                print("xxxxx Sending data:", response_data)
                 sock.send(response_data.encode())
 
             except json.JSONDecodeError as e:
