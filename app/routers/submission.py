@@ -111,10 +111,11 @@ async def run(request: Request, run_sub: APIRunSubmission) -> JSONResponse:
         f"{submission.submission_id}.log"
     )
 
+
     task = start_exec.delay(
         code=submission.code,
-        module_path=str(submission_path.absolute()),
-        log_path=str(log_path.absolute()),
+        module_path=str(submission_path),
+        log_path=str(log_path),
         metadata={"submission_id": submission.submission_id}
     )
 
