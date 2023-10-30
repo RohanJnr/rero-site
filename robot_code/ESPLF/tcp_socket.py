@@ -5,7 +5,7 @@ import time
 
 def main():
     # Define the server address and port
-    server_address = ('127.0.0.1', 12345)
+    server_address = ('127.0.0.1', 8002)
 
     # Create a socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -34,7 +34,7 @@ def main():
 
                 # Prepare a response
                 motor_left = 10
-                motor_right = 20
+                motor_right = 10
                 response_data = f"motor {motor_left} {motor_right}\n"
 
                 # Send the response back to the server

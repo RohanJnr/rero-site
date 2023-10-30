@@ -3,8 +3,8 @@ from pathlib import Path
 from redis.asyncio import Redis
 
 
-SUBMISSIONS_PATH = Path("submissions")
-CELERY_SUBMISSIONS_PATH = Path("celery_submissions")
+SUBMISSIONS_PATH = "submissions"
+CELERY_SUBMISSIONS_PATH = "celery_submissions"
 
 
 class Connections:
