@@ -151,11 +151,8 @@ async def stop(request: Request, stop_sub: APIRunSubmission) -> JSONResponse:
 @router.post("/task_finished")
 async def task_finished(request: Request, data: APITaskFinished) -> JSONResponse:
     """Handle task finish state."""
-    log_path = Path(data.log_path)
-    logs = log_path.read_text()
-
     ref = request.state.db.collection("submissions").document(data.submission_id)
-    await ref.update({"logs": logs})
+    await ref.update({"logs": data.logs})
     return JSONResponse('{"key": "value"}')
 
 

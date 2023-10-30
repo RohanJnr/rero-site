@@ -11,17 +11,17 @@ from celery.signals import task_postrun
 from app.models import APITaskFinished
 
 
-BACKEND_ROUTE = "http://localhost:8000"
+BACKEND_ROUTE = "http://20.197.11.23:8000"
 
 
-app = Celery('tasks', broker='redis://localhost')
+app = Celery('tasks', broker='redis://20.197.11.23')
 app.conf.update(
     task_serializer='json',
     accept_content=['json'],  # Ignore other content
     result_serializer='json',
     timezone='Europe/Oslo',
     enable_utc=True,
-    result_backend='redis://localhost'
+    result_backend='redis://20.197.11.23'
 )
 
 
@@ -67,7 +67,11 @@ def task_postrun_handler(sender=None, headers=None, body=None, **kwargs) -> None
     metadata = ctx.kwargs.get("metadata", None)
     log_path = ctx.kwargs.get("log_path", None)
 
-    data = APITaskFinished(submission_id=metadata["submission_id"], task_id=ctx.id, log_path=log_path)
+    log_path = Path(log_path)
+
+    logs = log_path.read_text()
+
+    data = APITaskFinished(submission_id=metadata["submission_id"], task_id=ctx.id, log_path=str(log_path), logs=logs)
     headers = {
         "Content-Type": "application/json"
     }

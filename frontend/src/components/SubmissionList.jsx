@@ -71,7 +71,7 @@ function SubmissionList(props) {
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
 
-        const res = await fetch("http://localhost:8000/api/submission/run", {
+        const res = await fetch("http://20.197.11.23:8000/api/submission/run", {
             method: "POST",
             body: JSON.stringify(payload),
             headers: myHeaders
@@ -86,7 +86,6 @@ function SubmissionList(props) {
         console.log(jsonRes)
 
         setRunButtonSpinner("")
-        // setTaskRunning(true)
 
     }
 
@@ -100,7 +99,7 @@ function SubmissionList(props) {
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
 
-        const res = await fetch("http://localhost:8000/api/submission/stop", {
+        const res = await fetch("http://20.197.11.23:8000/api/submission/stop", {
             method: "POST",
             body: JSON.stringify(payload),
             headers: myHeaders

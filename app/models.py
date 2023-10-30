@@ -41,3 +41,4 @@ class APITaskFinished(BaseModel):
     submission_id: str
     task_id: str
     log_path: str
+    logs: str
