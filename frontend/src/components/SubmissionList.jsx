@@ -2,12 +2,30 @@ import {createResource, createSignal, createEffect} from "solid-js";
 import { app } from "../firebasestuff/client";
 import { getFirestore, collection, query, where, getDocs, orderBy } from "firebase/firestore";
 import { Motion, Presence } from "@motionone/solid";
+import { useKeyDownEvent } from "@solid-primitives/keyboard";
 
 import hljs from 'highlight.js'
 import "highlight.js/styles/stackoverflow-light.css";
 
 function SubmissionList(props) {
 
+
+    createEffect(() => {
+        document.addEventListener("keydown", e=> {
+            const movementKeys = ['w', 'a', 's', 'd']
+            
+            if (movementKeys.includes(e.key)) {
+                
+            }
+        })
+
+        document.addEventListener("keyup", e=> {
+            console.log("keyup: ", e.key)
+        })
+      });
+    
+    const BASE_BACKEND_URL = "http://localhost:8000"
+    // CONST BASE_BACKEND_URL = "http://20.197.11.23:8000"
     const {user} = props
 
     const [showCode, setShowCode] = createSignal("")
@@ -17,7 +35,12 @@ function SubmissionList(props) {
     const [stopButtonSpinner, setStopButtonSpinner] = createSignal("")
 
     const [taskRunning, setTaskRunning] = createSignal("")
+    const [controlIsActive, setControlIsActive] = createSignal(false)
+    let wsConnection = null
 
+    createEffect(() => {
+        console.log(fetch, WebSocket)
+    })
 
     const fetchUserSubmissions = async () => {
         const db = getFirestore(app);
@@ -37,6 +60,48 @@ function SubmissionList(props) {
     }
 
     const [data] = createResource(fetchUserSubmissions)
+
+
+    const toggleControls = async () => {
+        console.log("Controls: ", controlIsActive())
+
+        if (controlIsActive()) {
+            console.log("Shutting down manual controls.")
+
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+
+            const res = await fetch(`${BASE_BACKEND_URL}/api/submission/deactivate_controls`, {
+                method: "POST",
+                headers: myHeaders
+            })
+
+            const jsonRes = await res.json()
+            
+            if (jsonRes.status !== 200) {
+                alert("Something went wrong!")
+                return
+            }
+            setControlIsActive(false)
+
+        } else {
+            console.log("Turning on manual controls.")
+            console.log(WebSocket)
+
+            const ws = new WebSocket("ws://localhost:8000/controls")
+            ws.addEventListener("open", e => {
+                console.log("connected")
+            })
+
+            ws.addEventListener("message", e => {
+                console.log("Got message: ", e.data)
+            })
+
+            wsConnection = ws
+
+
+        }
+    }
 
     const toggleCode = id => {
         if (showCode() === id) {
@@ -62,6 +127,10 @@ function SubmissionList(props) {
     }
 
     const runSubmission = async (submission_id) => {
+        if (controlIsActive() === true) {
+            alert("Cannot run task when manual controls are active! Please turn off manual controls before running a submissions.")
+            return
+        }
         setRunButtonSpinner(submission_id)
         const payload = {
             submission_id,
@@ -71,7 +140,7 @@ function SubmissionList(props) {
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
 
-        const res = await fetch("http://20.197.11.23:8000/api/submission/run", {
+        const res = await fetch(`${BASE_BACKEND_URL}/api/submission/run`, {
             method: "POST",
             body: JSON.stringify(payload),
             headers: myHeaders
@@ -99,7 +168,7 @@ function SubmissionList(props) {
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
 
-        const res = await fetch("http://20.197.11.23:8000/api/submission/stop", {
+        const res = await fetch(`${BASE_BACKEND_URL}/api/submission/stop`, {
             method: "POST",
             body: JSON.stringify(payload),
             headers: myHeaders
@@ -111,9 +180,13 @@ function SubmissionList(props) {
         setStopButtonSpinner("")
     }
 
+    const keyDownEventHandler = (e) => {
+        console.log("Key pressed")
+    }
+
     return (
         <div>
-            <div class="my-10">
+            <div class="my-10" onKeyUp={() => console.log("down")}>
                 <div class="rounded-lg overflow-hidden shadow-md max-h-[60vh] overflow-y-scroll">
                     <div class="grid grid-cols-5 w-full text-gray-700 uppercase bg-gray-50 font-bold text-xs px-6 py-3">
                         <p>submission ID</p>
@@ -185,7 +258,7 @@ function SubmissionList(props) {
                                 
                 </div>
             </div>
-            <button type="button" class="text-white bg-yellow-400 hover:bg-yellow-500 focus:outline-none focus:ring-4 focus:ring-yellow-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:focus:ring-yellow-900">Yellow</button>
+            <button onClick={toggleControls} type="button" class={`${controlIsActive() ? 'text-white bg-yellow-400': 'text-yellow-400 bg-white hover:text-white'} border-2 border-yellow-400 hover:bg-yellow-400 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:focus:ring-yellow-900`}>Start Manual Controls</button>
         </div>
     )
 }
