@@ -9,19 +9,32 @@ import "highlight.js/styles/stackoverflow-light.css";
 
 function SubmissionList(props) {
 
+    const [controlIsActive, setControlIsActive] = createSignal(false)
+    let wsConnection = null
 
     createEffect(() => {
-        document.addEventListener("keydown", e=> {
+        if (controlIsActive()) {
             const movementKeys = ['w', 'a', 's', 'd']
-            
-            if (movementKeys.includes(e.key)) {
+            document.addEventListener("keydown", e=> {
+                console.log("keydown: ", e.key)
+                if (movementKeys.includes(e.key)) {
+                    if (wsConnection) {
+                        wsConnection.send(e.key)
+                    }
+                }
+            })
+    
+            document.addEventListener("keyup", e=> {
+                console.log("keyup: ", e.key)
+    
                 
-            }
-        })
-
-        document.addEventListener("keyup", e=> {
-            console.log("keyup: ", e.key)
-        })
+                if (movementKeys.includes(e.key)) {
+                    if (wsConnection) {
+                        wsConnection.send('x')
+                    }
+                }
+            })
+        }
       });
     
     const BASE_BACKEND_URL = "http://localhost:8000"
@@ -35,12 +48,7 @@ function SubmissionList(props) {
     const [stopButtonSpinner, setStopButtonSpinner] = createSignal("")
 
     const [taskRunning, setTaskRunning] = createSignal("")
-    const [controlIsActive, setControlIsActive] = createSignal(false)
-    let wsConnection = null
 
-    createEffect(() => {
-        console.log(fetch, WebSocket)
-    })
 
     const fetchUserSubmissions = async () => {
         const db = getFirestore(app);
@@ -67,24 +75,20 @@ function SubmissionList(props) {
 
         if (controlIsActive()) {
             console.log("Shutting down manual controls.")
-
-            const myHeaders = new Headers();
-            myHeaders.append("Content-Type", "application/json");
-
-            const res = await fetch(`${BASE_BACKEND_URL}/api/submission/deactivate_controls`, {
-                method: "POST",
-                headers: myHeaders
-            })
-
-            const jsonRes = await res.json()
-            
-            if (jsonRes.status !== 200) {
-                alert("Something went wrong!")
-                return
+            if (wsConnection) {
+                wsConnection.close()
+                wsConnection = null
             }
+
             setControlIsActive(false)
 
         } else {
+            const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            const res = await fetch(`${BASE_BACKEND_URL}/api/submission/stop`, {
+                method: "POST",
+                headers: myHeaders
+            })
             console.log("Turning on manual controls.")
             console.log(WebSocket)
 
@@ -98,7 +102,7 @@ function SubmissionList(props) {
             })
 
             wsConnection = ws
-
+            setControlIsActive(true)
 
         }
     }
@@ -170,7 +174,6 @@ function SubmissionList(props) {
 
         const res = await fetch(`${BASE_BACKEND_URL}/api/submission/stop`, {
             method: "POST",
-            body: JSON.stringify(payload),
             headers: myHeaders
         })
 
@@ -180,13 +183,9 @@ function SubmissionList(props) {
         setStopButtonSpinner("")
     }
 
-    const keyDownEventHandler = (e) => {
-        console.log("Key pressed")
-    }
-
     return (
         <div>
-            <div class="my-10" onKeyUp={() => console.log("down")}>
+            <div class="my-10">
                 <div class="rounded-lg overflow-hidden shadow-md max-h-[60vh] overflow-y-scroll">
                     <div class="grid grid-cols-5 w-full text-gray-700 uppercase bg-gray-50 font-bold text-xs px-6 py-3">
                         <p>submission ID</p>
@@ -258,7 +257,7 @@ function SubmissionList(props) {
                                 
                 </div>
             </div>
-            <button onClick={toggleControls} type="button" class={`${controlIsActive() ? 'text-white bg-yellow-400': 'text-yellow-400 bg-white hover:text-white'} border-2 border-yellow-400 hover:bg-yellow-400 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:focus:ring-yellow-900`}>Start Manual Controls</button>
+            <button onClick={toggleControls} type="button" class={`${controlIsActive() ? 'text-white bg-yellow-400': 'text-yellow-400 bg-white hover:text-white'} duration-300 ease-in border-2 border-yellow-400 hover:bg-yellow-400 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:focus:ring-yellow-900`}>Manual Controls: {controlIsActive() ? 'Activated': "Deactivated"}</button>
         </div>
     )
 }

@@ -73,12 +73,13 @@ def main():
                 #     motor_left = 0
                 #     motor_right = 100
                 motor_left, motor_right = getMotorValues(received_data)
-                response_data = f"motor {motor_left} {motor_right}\n"
+                response_data = f'motor "{"f" if motor_left>0 else "b"}" "{abs(motor_left)}" "{"f" if motor_right>0 else "b"}" "{abs(motor_right)}"' + '\n'
+                # response_data = f"motor {motor_left} {motor_right}\n"
 
                 # Send the response back to the server
                 print("xxxxx Sending data:", response_data)
                 sock.send(response_data.encode("ascii"))
-                time.sleep(2)
+                # time.sleep(2)
 
             except json.JSONDecodeError as e:
                 print("Error parsing JSON:", e)

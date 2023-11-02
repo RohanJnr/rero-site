@@ -2,10 +2,9 @@ import logging
 import typing as t
 
 import firebase_admin
-
+from celery.result import AsyncResult
 from dotenv import load_dotenv
-
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket
 from fastapi.responses import Response
 from fastapi.requests import Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,6 +13,7 @@ from starlette.middleware import Middleware
 
 from app.routers import submission
 from app.constants import Connections
+from task_manager.tasks import start_controls
 
 load_dotenv()
 
@@ -76,3 +76,18 @@ async def setup_data(request: Request, callnext: t.Callable) -> Response:
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+
+@app.websocket("/controls")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    task: AsyncResult = start_controls.delay()
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await Connections.REDIS.publish("controls", data)
+            await websocket.send_text(f"Message text was: {data}")
+    except Exception as e:
+        print(f"Got error: {e}")
+    finally:
+        task.revoke(terminate=True)

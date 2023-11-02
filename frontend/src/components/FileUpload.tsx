@@ -55,7 +55,7 @@ function FileUpload(props) {
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
 
-        const res = await fetch("http://20.197.11.23:8000/api/submission/submit", {
+        const res = await fetch("http://localhost:8000/api/submission/submit", {
             method: "POST",
             body: JSON.stringify(payload),
             headers: myHeaders

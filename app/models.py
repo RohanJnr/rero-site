@@ -39,6 +39,5 @@ class APIRunSubmission(BaseModel):
 class APITaskFinished(BaseModel):
     """Task finished data received by webhook."""
     submission_id: str
-    task_id: str
     log_path: str
     logs: str

@@ -132,16 +132,18 @@ async def run(request: Request, run_sub: APIRunSubmission) -> JSONResponse:
 
 
 @router.post("/stop")
-async def stop(request: Request, stop_sub: APIRunSubmission) -> JSONResponse:
+async def stop(request: Request) -> JSONResponse:
     """Stop a celery task."""
     data = await Connections.REDIS.get("current-task")
+    if not data:
+        return JSONResponse(content={}, status_code=200)
     data = json.loads(data.decode())
 
     task: AsyncResult = app.AsyncResult(data["task_id"])
     task.revoke(terminate=True)
-
+    print("DONE")
     data = {
-        "task_id": task.id
+        "task_id": task.id  
     }
 
     await Connections.REDIS.delete("current-task")
