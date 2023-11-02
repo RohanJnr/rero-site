@@ -114,7 +114,7 @@ function SubmissionList(props) {
     return (
         <div>
             <div class="my-10">
-                <div class="rounded-lg overflow-hidden shadow-md">
+                <div class="rounded-lg overflow-hidden shadow-md max-h-[60vh] overflow-y-scroll">
                     <div class="grid grid-cols-5 w-full text-gray-700 uppercase bg-gray-50 font-bold text-xs px-6 py-3">
                         <p>submission ID</p>
                         <p>Submitted Timestamp</p>

@@ -9,8 +9,11 @@ from celery.app.task import Context
 from celery.signals import task_postrun
 
 from app.models import APITaskFinished
+from task_manager.utils import stop_robot
 
 
+ESP_IP_ADDR = '192.168.0.105'
+ESP_PORT = 8002
 BACKEND_ROUTE = "http://20.197.11.23:8000"
 
 
@@ -49,7 +52,7 @@ def start_exec(*, code: str, module_path: str, log_path: str, **kwargs) -> None:
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
             main_function = module.main
-            main_function()
+            main_function(ESP_IP_ADDR, ESP_PORT)
 
         except Exception as e:
             trace = traceback.format_exc()
@@ -61,6 +64,10 @@ def start_exec(*, code: str, module_path: str, log_path: str, **kwargs) -> None:
 @task_postrun.connect
 def task_postrun_handler(sender=None, headers=None, body=None, **kwargs) -> None:
     """Handle post task run."""
+    result = stop_robot(ESP_IP_ADDR, ESP_PORT)
+    if not result:
+        print("Couldn't stop ESP Robot, please stop it manually!")
+
     print("Task Done.")
 
     ctx: Context = sender.request
