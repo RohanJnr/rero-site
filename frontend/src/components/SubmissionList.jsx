@@ -9,7 +9,7 @@ import "highlight.js/styles/stackoverflow-light.css";
 
 function SubmissionList(props) {
 
-    const BASE_BACKEND_URL = "http://localhost:8000"
+    const BASE_BACKEND_URL = "http://20.197.11.23:8000"
     // CONST BASE_BACKEND_URL = "http://20.197.11.23:8000"
 
     const [controlIsActive, setControlIsActive] = createSignal(false)
