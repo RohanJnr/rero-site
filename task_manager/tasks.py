@@ -70,11 +70,14 @@ def start_controls():
     server_address = (ESP_IP_ADDR, ESP_PORT)
     # Create a socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print("connected.")
     # Connect to the server
+    print("Attempting to connect to socket...")
     sock.connect(server_address)
+    print("Connected to socket. Trying to receive data.")
 
     data = sock.recv(1024)
+
+    print("Recieved data: ", data)
 
     redis_conn = redis.Redis(host="20.197.11.23", port=6379)
 
