@@ -173,10 +173,11 @@ async def task_finished(request: Request, data: APITaskFinished) -> JSONResponse
     await ref.update({"logs": data.logs})
 
     store_data = await Connections.REDIS.get("current-task")
-    store_data = json.loads(store_data.decode())
+    if store_data:
+        store_data = json.loads(store_data.decode())
 
-    if store_data["submission_id"] == data.submission_id:
-        await Connections.REDIS.delete("current-task")
+        if store_data["submission_id"] == data.submission_id:
+            await Connections.REDIS.delete("current-task")
 
     return JSONResponse('{"key": "value"}')
 

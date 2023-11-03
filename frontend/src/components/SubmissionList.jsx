@@ -9,7 +9,7 @@ import "highlight.js/styles/stackoverflow-light.css";
 
 function SubmissionList(props) {
 
-    const BASE_BACKEND_URL = "http://localhost:8000"
+    const BASE_BACKEND_URL = "https://server.ieeeraspesu.tech"
     // CONST BASE_BACKEND_URL = "http://20.197.11.23:8000"
 
     const [controlIsActive, setControlIsActive] = createSignal(false)
@@ -116,7 +116,7 @@ function SubmissionList(props) {
             console.log("Turning on manual controls.")
             console.log(WebSocket)
 
-            const ws = new WebSocket("ws://localhost:8000/controls")
+            const ws = new WebSocket(`wss://server.ieeeraspesu.tech/controls`)
             ws.addEventListener("open", e => {
                 console.log("connected")
             })
