@@ -46,4 +46,5 @@ def stop_robot(ip_addr: str, port: int):
 
     # Close the socket when done
     sock.close()
+    print("closed connection.")
     return True
