@@ -44,7 +44,8 @@ def stop_robot(ip_addr: str, port: int):
         print(f"Error occurred: {e}")
         return False
 
-    # Close the socket when done
-    sock.close()
-    print("closed connection.")
-    return True
+    finally:
+        # Close the socket when done
+        sock.close()
+        print("closed connection.")
+        return True

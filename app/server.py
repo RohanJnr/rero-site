@@ -90,4 +90,4 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         print(f"Got error: {e}")
     finally:
-        task.revoke(terminate=True)
+        task.revoke(terminate=True, signal="SIGKILL")
