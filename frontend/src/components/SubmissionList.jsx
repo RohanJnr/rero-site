@@ -116,7 +116,7 @@ function SubmissionList(props) {
             console.log("Turning on manual controls.")
             console.log(WebSocket)
 
-            const ws = new WebSocket("ws://localhost:8000/controls")
+            const ws = new WebSocket(`wss://server.ieeeraspesu.tech/controls`)
             ws.addEventListener("open", e => {
                 console.log("connected")
             })
