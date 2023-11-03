@@ -14,7 +14,8 @@ def sanity_check(function_code) -> Tuple[bool, str]:
 
         def has_main_function(node):
             if isinstance(node, ast.FunctionDef) and node.name == "main":
-                return True
+                if len(node.args.args) == 2:
+                    return True
             return False
 
         if any(has_main_function(node) for node in ast.walk(tree)):

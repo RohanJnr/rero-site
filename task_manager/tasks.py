@@ -4,6 +4,7 @@ import socket
 import sys
 import traceback
 from pathlib import Path
+from threading import Thread
 
 import redis
 from celery import Celery
@@ -14,8 +15,8 @@ from app.models import APITaskFinished
 from task_manager.utils import stop_robot
 
 
-ESP_IP_ADDR = '192.168.0.101'
-ESP_PORT = 8002
+ESP_IP_ADDR = 'localhost'
+ESP_PORT = 12345
 BACKEND_ROUTE = "http://localhost:8000"
 
 
@@ -103,14 +104,45 @@ def start_controls():
                 print("no value.")
 
 
-@task_revoked.connect
+@task_postrun.connect
 def task_postrun_handler(sender=None, headers=None, body=None, **kwargs) -> None:
+    """Handle post task run."""
+    print("Task Post Run.")
+    p = Thread(target=stop_robot, args=(ESP_IP_ADDR, ESP_PORT))
+    p.start()
+    p.join(timeout=15)
+    # result = stop_robot(ESP_IP_ADDR, ESP_PORT)
+    # if not result:
+    #     print("Couldn't stop ESP Robot, please stop it manually!")
+
+    ctx: Context = sender.request
+    metadata = ctx.kwargs.get("metadata", None)
+    log_path = ctx.kwargs.get("log_path", None)
+    if not metadata or not log_path:
+        return
+    log_path = Path(log_path)
+    logs = log_path.read_text()
+
+    data = APITaskFinished(submission_id=metadata["submission_id"], log_path=str(log_path), logs=logs)
+    headers = {
+        "Content-Type": "application/json"
+    }
+    r = requests.post(f"{BACKEND_ROUTE}/api/submission/task_finished", json=data.model_dump(), headers=headers)
+    print(r.status_code)
+    print(r.text)
+
+
+@task_revoked.connect
+def task_revoked_handler(sender=None, headers=None, body=None, **kwargs) -> None:
     """Handle post task run."""
     print(sender)
     print("Cancelling task...")
-    result = stop_robot(ESP_IP_ADDR, ESP_PORT)
-    if not result:
-        print("Couldn't stop ESP Robot, please stop it manually!")
+    p = Thread(target=stop_robot, args=(ESP_IP_ADDR, ESP_PORT))
+    p.start()
+    p.join(timeout=15)
+    # result = stop_robot(ESP_IP_ADDR, ESP_PORT)
+    # if not result:
+    #     print("Couldn't stop ESP Robot, please stop it manually!")
 
     print("Task Cancelled.")
     # ctx: Context = sender.request

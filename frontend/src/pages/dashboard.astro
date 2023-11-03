@@ -9,7 +9,7 @@ const user = Astro.locals.user;
 if (!user) {
   return Astro.redirect("/signin");
 }
-
+console.log(Astro.url.searchParams)
 const db = getFirestore(app);
 const robotsRef = db.collection("robots")
 const dataSnapshot = await robotsRef.where("active", "==", true).get()
@@ -39,14 +39,9 @@ const data = dataSnapshot.docs.map((doc) => ({
             <h3 class="text-2xl font-semibold">{robot.fullName} <span class="bg-secondary text-white rounded p-2 ml-2">{robot.name}</span></h3>
             <p class="my-5">{robot.introduction}</p>
             <div class="mt-10 flex justify-start items-center gap-10">
-              <a href={`/robots/${robot.name}`} class="flex justify-start items-center gap-2 text-primary font-medium w-fit">View Details <svg class="w-4 h-4 text-primary" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+              <a href='https://hackmd.io/@YZUylGuBRc-V1F0eKQx3zA/B1rpPGfmT' class="flex justify-start items-center gap-2 text-primary font-medium w-fit">View Details <svg class="w-4 h-4 text-primary" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
   </svg></a>
-
-  <a href="#" class="flex justify-start items-center gap-2 text-primary font-medium w-fit">Previous Submissions <svg class="w-4 h-4 text-primary" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-  </svg></a>
-
   <a href={`/robots/${robot.name}/code`} class="flex justify-start items-center gap-2 rounded bg-primary text-white px-4 py-3 font-medium w-fit">Submit Code <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
   </svg></a>

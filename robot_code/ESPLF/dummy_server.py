@@ -23,10 +23,7 @@ while True:
 
     try:
         # Define a sample JSON data
-        json_data = {
-            'message': 'Hello, client!',
-            'details': 'This is a JSON message from the server.'
-        }
+        json_data = {'s1': 1, 's2': 1, 's3': 1, 's4': 1, 's5': 1}
 
         # Serialize the JSON data to a string
         json_string = json.dumps(json_data)

@@ -32,7 +32,7 @@ class Submission(APISubmission):
 
 class APIRunSubmission(BaseModel):
     """Submission to run received by API."""
-    submission_id: str
+    submission_id: t.Optional[str] = None
     user_email: str
 
 

@@ -83,6 +83,13 @@ async def submit(request: Request, sub: APISubmission) -> JSONResponse:
 @router.post("/run")
 async def run(request: Request, run_sub: APIRunSubmission) -> JSONResponse:
     """Run a particular submission."""
+
+    robot = await request.state.db.collection("robots").where(filter=FieldFilter("name", "==", "ESPLF")).get()
+    robot = robot[0].to_dict()
+
+    if run_sub.user_email not in robot["codeAccess"]:
+        return JSONResponse({"detail": "Not permitted to run."}, status_code=400)
+
     ref = request.state.db.collection("submissions").document(run_sub.submission_id)
 
     doc = await ref.get()
@@ -132,8 +139,16 @@ async def run(request: Request, run_sub: APIRunSubmission) -> JSONResponse:
 
 
 @router.post("/stop")
-async def stop(request: Request) -> JSONResponse:
+async def stop(request: Request, data: APIRunSubmission) -> JSONResponse:
     """Stop a celery task."""
+
+    robot = await request.state.db.collection("robots").where(filter=FieldFilter("name", "==", "ESPLF")).get()
+    robot = robot[0].to_dict()
+
+    if data.user_email not in robot["codeAccess"]:
+        return JSONResponse({"detail": "Not permitted to run."}, status_code=400)
+    
+
     data = await Connections.REDIS.get("current-task")
     if not data:
         return JSONResponse(content={}, status_code=200)
@@ -156,19 +171,27 @@ async def task_finished(request: Request, data: APITaskFinished) -> JSONResponse
     """Handle task finish state."""
     ref = request.state.db.collection("submissions").document(data.submission_id)
     await ref.update({"logs": data.logs})
+
+    store_data = await Connections.REDIS.get("current-task")
+    store_data = json.loads(store_data.decode())
+
+    if store_data["submission_id"] == data.submission_id:
+        await Connections.REDIS.delete("current-task")
+
     return JSONResponse('{"key": "value"}')
 
 
-@router.post("/task_status")
+@router.get("/task_status")
 async def task_status(request: Request) -> JSONResponse:
     """Check task status."""
 
     data = await Connections.REDIS.get("current-task")
     if not data:
         return JSONResponse({
-            "status": "FREE"
+            "status": "Bot is currently not running any task"
         })
 
+    data = json.loads(data.decode())
     return JSONResponse({
-        "status": "NOTFREE"
+        "status": f"Task Running with id: {data['submission_id']}"
     })

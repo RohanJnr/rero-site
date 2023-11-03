@@ -1,6 +1,6 @@
 ---
 import Layout from "../../../layouts/Layout.astro";
-import { app } from "../../../firebase/server";
+import { app } from "../../../firebasestuff/server";
 import { getFirestore } from "firebase-admin/firestore";
 
 const user = Astro.locals.user;
@@ -32,4 +32,4 @@ const robot = data[0]
         </div>
 
     </section>
-</Layout>../../../firebasestuff/server
+</Layout>

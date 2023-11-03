@@ -9,8 +9,22 @@ import "highlight.js/styles/stackoverflow-light.css";
 
 function SubmissionList(props) {
 
+    const BASE_BACKEND_URL = "http://localhost:8000"
+    // CONST BASE_BACKEND_URL = "http://20.197.11.23:8000"
+
     const [controlIsActive, setControlIsActive] = createSignal(false)
     let wsConnection = null
+
+
+    const fetchState = async () => {
+        const data = await fetch(`${BASE_BACKEND_URL}/api/submission/task_status`)
+        const jsonData = await data.json()
+        return jsonData['status']
+    }
+
+    const [robotState, { mutate, refetch }] = createResource(fetchState);
+
+    setInterval(refetch, 5000)
 
     createEffect(() => {
         if (controlIsActive()) {
@@ -37,8 +51,7 @@ function SubmissionList(props) {
         }
       });
     
-    const BASE_BACKEND_URL = "http://localhost:8000"
-    // CONST BASE_BACKEND_URL = "http://20.197.11.23:8000"
+
     const {user} = props
 
     const [showCode, setShowCode] = createSignal("")
@@ -67,12 +80,12 @@ function SubmissionList(props) {
         return data
     }
 
-    const [data] = createResource(fetchUserSubmissions)
+    const [data, states] = createResource(fetchUserSubmissions)
+
+    const userSubmissionRefetch = states.refetch
 
 
     const toggleControls = async () => {
-        console.log("Controls: ", controlIsActive())
-
         if (controlIsActive()) {
             console.log("Shutting down manual controls.")
             if (wsConnection) {
@@ -83,12 +96,23 @@ function SubmissionList(props) {
             setControlIsActive(false)
 
         } else {
+            const payload = {
+                user_email: user.email
+            }
+    
             const myHeaders = new Headers();
             myHeaders.append("Content-Type", "application/json");
             const res = await fetch(`${BASE_BACKEND_URL}/api/submission/stop`, {
                 method: "POST",
+                body: JSON.stringify(payload),
                 headers: myHeaders
             })
+            const jsonRes = await res.json()
+            if (res.status !== 200) {
+                alert(`Error! Mostly permissions error, ${jsonRes['detail']}`)
+                return
+            }
+
             console.log("Turning on manual controls.")
             console.log(WebSocket)
 
@@ -153,7 +177,7 @@ function SubmissionList(props) {
         const jsonRes = await res.json()
         
         if (res.status !== 200){
-            alert(`Error: ${jsonRes}`)
+            alert(`Error: ${jsonRes['detail']}`)
         }
 
         console.log(jsonRes)
@@ -174,11 +198,16 @@ function SubmissionList(props) {
 
         const res = await fetch(`${BASE_BACKEND_URL}/api/submission/stop`, {
             method: "POST",
+            body: JSON.stringify(payload),
             headers: myHeaders
         })
 
         const jsonRes = await res.json()
         console.log(jsonRes)
+
+        if (res.status !== 200) {
+            alert(`Error: ${jsonRes['detail']}`)
+        }
 
         setStopButtonSpinner("")
     }
@@ -186,7 +215,7 @@ function SubmissionList(props) {
     return (
         <div>
             <div class="my-10">
-                <div class="rounded-lg overflow-hidden shadow-md max-h-[60vh] overflow-y-scroll">
+                <div class="rounded-lg overflow-hidden shadow-md">
                     <div class="grid grid-cols-5 w-full text-gray-700 uppercase bg-gray-50 font-bold text-xs px-6 py-3">
                         <p>submission ID</p>
                         <p>Submitted Timestamp</p>
@@ -257,7 +286,15 @@ function SubmissionList(props) {
                                 
                 </div>
             </div>
+            <div class="flex justify-between items-center">
             <button onClick={toggleControls} type="button" class={`${controlIsActive() ? 'text-white bg-yellow-400': 'text-yellow-400 bg-white hover:text-white'} duration-300 ease-in border-2 border-yellow-400 hover:bg-yellow-400 font-medium rounded-full text-sm px-5 py-2.5 text-center mr-2 mb-2 dark:focus:ring-yellow-900`}>Manual Controls: {controlIsActive() ? 'Activated': "Deactivated"}</button>
+            <svg onClick={userSubmissionRefetch} class="hover:cursor-pointer w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 1v5h-5M2 19v-5h5m10-4a8 8 0 0 1-14.947 3.97M1 10a8 8 0 0 1 14.947-3.97"/>
+            </svg>
+
+            </div>
+            <p class="my-10">Current status: <span class="font-bold">{robotState()}</span></p>
+
         </div>
     )
 }
