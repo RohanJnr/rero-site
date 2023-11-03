@@ -15,19 +15,19 @@ from app.models import APITaskFinished
 from task_manager.utils import stop_robot
 
 
-ESP_IP_ADDR = 'localhost'
-ESP_PORT = 12345
-BACKEND_ROUTE = "http://localhost:8000"
+ESP_IP_ADDR = '192.168.0.106'
+ESP_PORT = 8002
+BACKEND_ROUTE = "https://server.ieeeraspesu.tech/"
 
 
-app = Celery('tasks', broker='redis://localhost')
+app = Celery('tasks', broker='redis://20.197.11.23')
 app.conf.update(
     task_serializer='json',
     accept_content=['json'],  # Ignore other content
     result_serializer='json',
     timezone='Europe/Oslo',
     enable_utc=True,
-    result_backend='redis://localhost'
+    result_backend='redis://20.197.11.23'
 )
 
 
@@ -76,7 +76,7 @@ def start_controls():
 
     data = sock.recv(1024)
 
-    redis_conn = redis.Redis()
+    redis_conn = redis.Redis(host="20.197.11.23", port=6379)
 
     pubsub = redis_conn.pubsub()
     pubsub.subscribe("controls")
